@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Bottle Volume Puzzle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(120deg, #ab2020, #383295);
+            background-size: 200% 200%;
+            animation: gradientAnimation 5s infinite;
+            margin: 0;
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .container {
+            text-align: center;
+        }
+        .bottles {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .bottle {
+            position: relative;
+            width: 100px;
+            height: 200px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            overflow: hidden;
+            background: url('empty-bottle.png') no-repeat center/contain;
+        }
+        .water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0;
+            background-color: rgba(0, 0, 255, 0.5);
+            transition: height 0.5s;
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .output {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .output {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .guess-input {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Water Bottle Volume Puzzle</h1>
+        <div class="bottles">
+            <div class="bottle" id="bottle-0">
+                <div class="water" id="water-0"></div>
+            </div>
+            <div class="bottle" id="bottle-1">
+                <div class="water" id="water-1"></div>
+            </div>
+            <div class="bottle" id="bottle-2">
+                <div class="water" id="water-2"></div>
+            </div>
+        </div>
+        <div class="buttons">
+            <button onclick="fill(0)">Fill Bottle 1</button>
+            <button onclick="fill(1)">Fill Bottle 2</button>
+            <button onclick="fill(2)">Fill Bottle 3</button>
+            <button onclick="empty(0)">Empty Bottle 1</button>
+            <button onclick="empty(1)">Empty Bottle 2</button>
+            <button onclick="empty(2)">Empty Bottle 3</button>
+            <button onclick="transfer(0, 1)">Transfer 1 -> 2</button>
+            <button onclick="transfer(1, 0)">Transfer 2 -> 1</button>
+            <button onclick="transfer(0, 2)">Transfer 1 -> 3</button>
+            <button onclick="transfer(2, 0)">Transfer 3 -> 1</button>
+            <button onclick="transfer(1, 2)">Transfer 2 -> 3</button>
+            <button onclick="transfer(2, 1)">Transfer 3 -> 2</button>
+        </div>
+        <div class="buttons">
+            <button onclick="startGame()">Start</button>
+            <button onclick="stopGame()">Stop</button>
+        </div>
+        <div class="guess-input">
+            <label for="guess-0">Guess Bottle 1:</label>
+            <input type="number" id="guess-0" min="0" step="1">
+            <label for="guess-1">Guess Bottle 2:</label>
+            <input type="number" id="guess-1" min="0" step="1">
+            <label for="guess-2">Guess Bottle 3:</label>
+            <input type="number" id="guess-2" min="0" step="1">
+            <button onclick="makeGuess()">Guess</button>
+        </div>
+        <div class="output" id="output"></div>
+    </div>
+        <div class="output" id="output"></div>
+    </div>
+    <script>
+        const capacities = [5, 7, 10]; // Capacities of the bottles in liters
+        const bottles = [0, 0, 0]; // Current water level in each bottle
+
+        function drawBottles() {
+            bottles.forEach((level, index) => {
+                const cap = capacities[index];
+                const heightPercentage = (level / cap) * 100;
+                document.getElementById(`water-${index}`).style.height = heightPercentage + '%';
+            });
+        }
+
+        function fill(index) {
+            bottles[index] = capacities[index];
+            drawBottles();
+            checkWin();
+        }
+
+        function empty(index) {
+            bottles[index] = 0;
+            drawBottles();
+            checkWin();
+        }
+
+        function transfer(from, to) {
+            const availableSpace = capacities[to] - bottles[to];
+            const transferAmount = Math.min(bottles[from], availableSpace);
+            bottles[to] += transferAmount;
+            bottles[from] -= transferAmount;
+            drawBottles();
+            checkWin();
+        }
+
+        function checkWin() {
+            const output = document.getElementById('output');
+            if (bottles.includes(4)) {
+                output.textContent = 'Congratulations! You have obtained exactly 4 liters of water!';
+            } else {
+                output.textContent = '';
+            }
+        }
+
+        function makeGuess() {
+            if (!gameActive) {
+                document.getElementById('output').textContent = 'Start the game first.';
+                return;
+            }
+            const guess0 = parseInt(document.getElementById('guess-0').value, 10);
+            const guess1 = parseInt(document.getElementById('guess-1').value, 10);
+            const guess2 = parseInt(document.getElementById('guess-2').value, 10);
+            const isCorrect = guess0 === capacities[0] && guess1 === capacities[1] && guess2 === capacities[2];
+            document.getElementById('output').textContent = isCorrect ? 'Correct!' : 'Wrong, try again!';
+        }
+
+        drawBottles(); // Initial drawing of bottle
+    </script>
+</body>
+</html>
+
+

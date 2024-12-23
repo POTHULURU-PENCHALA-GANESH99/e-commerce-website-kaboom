@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Mimic Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            text-align: center;
+        }
+        .button {
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            border: none;
+            outline: none;
+            cursor: pointer;
+        }
+        .button1 { background-color: red; }
+        .button2 { background-color: blue; }
+        .button3 { background-color: green; }
+        .button4 { background-color: yellow; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Sound Mimic Game</h1>
+        <div>
+            <button class="button button1" data-sound="1"></button>
+            <button class="button button2" data-sound="2"></button>
+            <button class="button button3" data-sound="3"></button>
+            <button class="button button4" data-sound="4"></button>
+        </div>
+        <button id="startButton">Start Game</button>
+    </div>
+
+    <script>
+        const buttons = document.querySelectorAll('.button');
+        const startButton = document.getElementById('startButton');
+        let sequence = [];
+        let playerSequence = [];
+        let level = 0;
+
+        // Sounds
+        const sounds = {
+            1: new Audio('https://www.soundjay.com/button/sounds/button-4.mp3'),
+            2: new Audio('https://www.soundjay.com/button/sounds/button-09.mp3'),
+            3: new Audio('https://www.soundjay.com/button/sounds/button-10.mp3'),
+            4: new Audio('https://www.soundjay.com/button/sounds/button-16.mp3')
+        };
+
+        function playSound(sound) {
+            sounds[sound].currentTime = 0;
+            sounds[sound].play();
+        }
+
+        function flashButton(button) {
+            button.style.opacity = '0.5';
+            setTimeout(() => button.style.opacity = '1', 300);
+        }
+
+        function playSequence() {
+            let i = 0;
+            const interval = setInterval(() => {
+                const sound = sequence[i];
+                const button = document.querySelector(`.button[data-sound="${sound}"]`);
+                playSound(sound);
+                flashButton(button);
+                i++;
+                if (i >= sequence.length) {
+                    clearInterval(interval);
+                }
+            }, 600);
+        }
+
+        function nextLevel() {
+            level++;
+            const nextSound = Math.floor(Math.random() * 4) + 1;
+            sequence.push(nextSound);
+            playSequence();
+        }
+
+        function resetGame() {
+            sequence = [];
+            playerSequence = [];
+            level = 0;
+            startButton.disabled = false;
+        }
+
+        function handleButtonClick(event) {
+            const sound = event.target.getAttribute('data-sound');
+            playSound(sound);
+            playerSequence.push(Number(sound));
+            if (playerSequence.length === sequence.length) {
+                if (JSON.stringify(playerSequence) === JSON.stringify(sequence)) {
+                    setTimeout(() => {
+                        playerSequence = [];
+                        nextLevel();
+                    }, 1000);
+                } else {
+                    alert('Game Over! You reached level ' + level);
+                    resetGame();
+                }
+            }
+        }
+
+        startButton.addEventListener('click', () => {
+            startButton.disabled = true;
+            nextLevel();
+        });
+
+        buttons.forEach(button => button.addEventListener('click', handleButtonClick));
+    </script>
+</body>
+</html>

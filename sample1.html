@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Draw</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #gameArea {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid black;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        #letter {
+            font-size: 64px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        #message {
+            margin-top: 10px;
+            font-size: 24px;
+        }
+        #score {
+            margin-top: 10px;
+            font-size: 24px;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button, select, input {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        button:hover, select:hover, input:hover {
+            background-color: #f0f0f0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div id="letter">Press Start</div>
+        <div id="message">Press the key as fast as you can when the letter appears!</div>
+        <div id="score">Score: 0</div>
+        <div class="controls">
+            <button id="startBtn">Start</button>
+            <button id="stopBtn" class="hidden">Stop</button>
+            <button id="resetBtn">Reset</button>
+            <label for="difficulty">Difficulty:</label>
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+            <label for="background">Background:</label>
+            <input type="color" id="background" value="#f0f0f0">
+        </div>
+    </div>
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const letterDiv = document.getElementById('letter');
+        const messageDiv = document.getElementById('message');
+        const scoreDiv = document.getElementById('score');
+        const difficultySelect = document.getElementById('difficulty');
+        const backgroundInput = document.getElementById('background');
+
+        let score = 0;
+        let currentLetter = '';
+        let startTime = 0;
+        let timeoutId = null;
+        let isRunning = false;
+
+        function getRandomLetter() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            return letters[Math.floor(Math.random() * letters.length)];
+        }
+
+        function getRandomDelay() {
+            const difficulty = difficultySelect.value;
+            switch (difficulty) {
+                case 'easy':
+                    return Math.random() * 2000 + 1000;
+                case 'medium':
+                    return Math.random() * 1500 + 500;
+                case 'hard':
+                    return Math.random() * 1000 + 500;
+                default:
+                    return Math.random() * 2000 + 1000;
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            updateScore();
+            startBtn.classList.add('hidden');
+            stopBtn.classList.remove('hidden');
+            messageDiv.textContent = 'Get ready...';
+            letterDiv.textContent = '';
+            isRunning = true;
+            timeoutId = setTimeout(showLetter, getRandomDelay());
+        }
+
+        function stopGame() {
+            isRunning = false;
+            clearTimeout(timeoutId);
+            startBtn.classList.remove('hidden');
+            stopBtn.classList.add('hidden');
+            messageDiv.textContent = 'Game stopped.';
+            letterDiv.textContent = 'Press Start';
+        }
+
+        function resetGame() {
+            stopGame();
+            score = 0;
+            updateScore();
+            messageDiv.textContent = 'Press the key as fast as you can when the letter appears!';
+        }
+
+        function showLetter() {
+            if (!isRunning) return;
+            currentLetter = getRandomLetter();
+            letterDiv.textContent = currentLetter;
+            startTime = new Date().getTime();
+            messageDiv.textContent = 'Type the letter!';
+        }
+
+        function updateScore() {
+            scoreDiv.textContent = `Score: ${score}`;
+        }
+
+        function handleKeyPress(event) {
+            if (!isRunning) return;
+            if (event.key.toUpperCase() === currentLetter) {
+                const reactionTime = new Date().getTime() - startTime;
+                score += Math.max(0, 1000 - reactionTime);
+                updateScore();
+                messageDiv.textContent = `Great! Your reaction time was ${reactionTime}ms.`;
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(showLetter, getRandomDelay());
+            }
+        }
+
+        startBtn.addEventListener('click', startGame);
+        stopBtn.addEventListener('click', stopGame);
+        resetBtn.addEventListener('click', resetGame);
+        backgroundInput.addEventListener('input', (e) => {
+            document.body.style.backgroundColor = e.target.value;
+        });
+        window.addEventListener('keydown', handleKeyPress);
+    </script>
+</body>
+</html>
